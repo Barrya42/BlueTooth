@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -29,7 +28,7 @@ import java.util.UUID;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, CheckBox.OnCheckedChangeListener
+public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener
 {
     private static String myUUID = "00001101-0000-1000-8000-00805F9B34FB";
     BluetoothDevice bluetoothDevice;
@@ -56,7 +55,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etMac.setText(adress);
         btScan = findViewById(R.id.btScan);
         cbAutoOPen = findViewById(R.id.cbAutoOPen);
-        btScan.setOnClickListener(this);
+        btScan.setOnClickListener(view ->
+        {
+            if (CheckPermissions())
+            {
+                StartScan();
+            }
+        });
         cbAutoOPen.setOnCheckedChangeListener(this);
         bluetoothHardwareAdapter = BluetoothAdapter.getDefaultAdapter();
         constraintLayout = findViewById(R.id.mainLayout);
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             bluetoothHardwareAdapter.enable();
         }
-        if (CheckPermissons())
+        if (CheckPermissions())
         {
             StartScan();
         }
@@ -142,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toDispose.dispose();
     }
 
-    private boolean CheckPermissons()
+    private boolean CheckPermissions()
     {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         if (permissionCheck == PackageManager.PERMISSION_DENIED)
@@ -214,16 +219,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View view)
-    {
-        if (CheckPermissons())
-        {
-            StartScan();
-        }
-
-    }
-
-    @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b)
     {
 
@@ -233,6 +228,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         bluetoothListAdapter.ClearDevices();
         StartScan();
-        Log.d("OnScan","Activity finish scan");
+        Log.d("OnScan", "Activity finish scan");
     }
 }

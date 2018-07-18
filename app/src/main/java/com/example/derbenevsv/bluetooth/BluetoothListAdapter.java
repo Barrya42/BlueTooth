@@ -45,6 +45,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
         BluetoothVH bluetoothVH = ((BluetoothVH) holder);
+
         BluetoothDevice device = bluetoothDevices
                 .get(position);
         bluetoothVH.setTvMac(device.getAddress());
