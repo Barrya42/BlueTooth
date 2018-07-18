@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener
 {
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     BluetoothDevice bluetoothDevice;
     BluetoothSocket bluetoothSocket;
     String adress = "00:21:13:04:af:f2".toUpperCase();
+    //String adress = "00:18:e4:34:f0:2e".toUpperCase();
     BroadcastReceiverScan reciver;
     BluetoothListAdapter bluetoothListAdapter;
     private BluetoothAdapter bluetoothHardwareAdapter;
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     private Button btScan;
     private CheckBox cbAutoOPen;
     private ExchangeRxJava exchangeTask;
+    private Button btOpen;
     private ConstraintLayout constraintLayout;
     private RecyclerView rvDevices;
     private int ACCESS_COARSE_LOCATION_PERMISSION = 15;
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                 StartScan();
             }
         });
+        btOpen = findViewById(R.id.btOpen);
         cbAutoOPen.setOnCheckedChangeListener(this);
         bluetoothHardwareAdapter = BluetoothAdapter.getDefaultAdapter();
         constraintLayout = findViewById(R.id.mainLayout);
@@ -74,6 +80,37 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
         bluetoothDevice = bluetoothHardwareAdapter.getRemoteDevice(adress);
         toDispose = new CompositeDisposable();
+        btOpen.setOnClickListener(view ->
+        {
+            try
+            {
+                Connect(bluetoothDevice);
+            }
+            catch (NoSuchMethodException e)
+            {
+                e.printStackTrace();
+            }
+            catch (InvocationTargetException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            exchangeTask.OpenDoor()
+                    .observeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(e ->
+                    {
+                        Log.d("LOG", e.toString());
+                    }, throwable ->
+                            throwable.printStackTrace());
+        });
 
 
     }
@@ -125,12 +162,13 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
     private BluetoothSocket Connect(BluetoothDevice bluetoothDevice) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException
     {
-
-        BluetoothSocket bluetoothSocket = (BluetoothSocket) bluetoothDevice.getClass()
-                .getMethod("createInsecureRfcommSocket", new Class[]{int.class})
-                .invoke(bluetoothDevice, 1);
-        bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
-
+        if (bluetoothSocket == null)
+        {
+            bluetoothSocket = (BluetoothSocket) bluetoothDevice.getClass()
+                    .getMethod("createRfcommSocket", new Class[]{int.class})
+                    .invoke(bluetoothDevice, 1);
+            bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
+        }
 
         if (!bluetoothSocket.isConnected())
         {

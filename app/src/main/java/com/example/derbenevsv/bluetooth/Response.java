@@ -20,5 +20,14 @@ public class Response
     {
         return command;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Response{" +
+                "resultCode=" + resultCode +
+                ", command='" + command + '\'' +
+                '}';
+    }
 }
 //
