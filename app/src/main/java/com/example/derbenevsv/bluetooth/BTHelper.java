@@ -30,6 +30,7 @@ public class BTHelper
         this.bluetoothListAdapter = bluetoothListAdapter;
     }
 
+    // TODO: 23.07.2018 Этот метод должен выполнятся в другом потоке
     private void ConnectToSocket(BluetoothDevice bluetoothDevice) throws IOException
     {
         if (bluetoothSocket == null)
