@@ -1,10 +1,7 @@
 package com.example.derbenevsv.bluetooth;
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,31 +17,27 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.UUID;
 
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener
 {
-    private static String myUUID = "00001101-0000-1000-8000-00805F9B34FB";
     BluetoothDevice bluetoothDevice;
-    BluetoothSocket bluetoothSocket;
+
     String adress = "00:21:13:04:af:f2".toUpperCase();
     //String adress = "00:18:e4:34:f0:2e".toUpperCase();
-    BroadcastReceiverScan reciver;
+    //BroadcastReceiverScan reciver;
     BluetoothListAdapter bluetoothListAdapter;
-    private BluetoothAdapter bluetoothHardwareAdapter;
     private EditText etMac;
     private Button btScan;
     private CheckBox cbAutoOPen;
-    private ExchangeRxJava exchangeTask;
+    //    private ExchangeRxJava exchangeTask;
+    private Door door;
+    private BTHelper btHelper;
     private Button btOpen;
     private ConstraintLayout constraintLayout;
     private RecyclerView rvDevices;
@@ -69,46 +62,30 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         });
         btOpen = findViewById(R.id.btOpen);
         cbAutoOPen.setOnCheckedChangeListener(this);
-        bluetoothHardwareAdapter = BluetoothAdapter.getDefaultAdapter();
         constraintLayout = findViewById(R.id.mainLayout);
         rvDevices = findViewById(R.id.rvDevices);
-//        BluetoothListAdapter.BluetoothDeviceListObserver bluetoothDeviceListObserver = new BluetoothDeviceListObserver();ы
         bluetoothListAdapter = new BluetoothListAdapter();
+        btHelper = new BTHelper(this, bluetoothListAdapter);
         rvDevices.setAdapter(bluetoothListAdapter);
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
-//        reciver = new BroadcastReceiverScan();
 
-        bluetoothDevice = bluetoothHardwareAdapter.getRemoteDevice(adress);
         toDispose = new CompositeDisposable();
         btOpen.setOnClickListener(view ->
         {
             try
             {
-                Connect(bluetoothDevice);
+                btHelper.Connect(adress);
             }
-            catch (NoSuchMethodException e)
-            {
-                e.printStackTrace();
-            }
-            catch (InvocationTargetException e)
-            {
-                e.printStackTrace();
-            }
-            catch (IllegalAccessException e)
-            {
-                e.printStackTrace();
-            }
+
             catch (IOException e)
             {
                 e.printStackTrace();
             }
-            exchangeTask.OpenDoor()
+            door.OpenDoor()
                     .observeOn(Schedulers.io())
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(e ->
-                    {
-                        Log.d("LOG", e.toString());
-                    }, throwable ->
+                            Log.d("LOG", e.toString()), throwable ->
                             throwable.printStackTrace());
         });
 
@@ -121,10 +98,6 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     {
         super.onResume();
 
-        if (!bluetoothHardwareAdapter.isEnabled())
-        {
-            bluetoothHardwareAdapter.enable();
-        }
         if (CheckPermissions())
         {
             StartScan();
@@ -160,24 +133,6 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     }
 
 
-    private BluetoothSocket Connect(BluetoothDevice bluetoothDevice) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException
-    {
-        if (bluetoothSocket == null)
-        {
-            bluetoothSocket = (BluetoothSocket) bluetoothDevice.getClass()
-                    .getMethod("createRfcommSocket", new Class[]{int.class})
-                    .invoke(bluetoothDevice, 1);
-            bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
-        }
-
-        if (!bluetoothSocket.isConnected())
-        {
-            bluetoothSocket.connect();
-            exchangeTask = new ExchangeRxJava(bluetoothSocket);
-        }
-        return bluetoothSocket;
-    }
-
     @Override
     protected void onDestroy()
     {
@@ -212,49 +167,11 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
     private void StartScan()
     {
+        btHelper.StartScan(this::OnScanFinish);
 
-        if (!bluetoothHardwareAdapter.isDiscovering())
-        {
-            if (reciver == null)
-            {
-                reciver = new BroadcastReceiverScan(bluetoothListAdapter, () ->
-                        OnScanFinish());
-                //toDispose.add(bluetoothListAdapter.getDisposable());
-            }
-
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-            intentFilter.addAction(BluetoothDevice.ACTION_UUID);
-            intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-            //unregisterReceiver(reciver.getReceiver());
-            registerReceiver(reciver, intentFilter);
-            bluetoothHardwareAdapter.startDiscovery();
-        }
 
     }
 
-    private void openDoor()
-    {
-
-
-        if (BluetoothAdapter.checkBluetoothAddress(adress))
-        {
-
-            if (bluetoothHardwareAdapter.getBondedDevices()
-                    .contains(bluetoothDevice))
-            {
-
-            }
-
-        }
-        else
-        {
-            Toast.makeText(getApplicationContext(), "adress is not valid.", Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b)
