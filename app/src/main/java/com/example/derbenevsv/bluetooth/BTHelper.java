@@ -21,7 +21,7 @@ public class BTHelper
     BroadcastReceiver receiver;
     Context context;
     private BluetoothListAdapter bluetoothListAdapter;
-    private BluetoothDevice bluetoothDevice;
+    //private BluetoothDevice bluetoothDevice;
 
     BTHelper(Context context, BluetoothListAdapter bluetoothListAdapter)
     {
@@ -30,7 +30,7 @@ public class BTHelper
         this.bluetoothListAdapter = bluetoothListAdapter;
     }
 
-    private void ConnectToSocket() throws IOException
+    private void ConnectToSocket(BluetoothDevice bluetoothDevice) throws IOException
     {
         if (bluetoothSocket == null)
         {
@@ -52,7 +52,7 @@ public class BTHelper
 //            {
 //                e.printStackTrace();
 //            }
-            bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
+            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
         }
 
         if (!bluetoothSocket.isConnected())
@@ -63,20 +63,18 @@ public class BTHelper
 
     public Door Connect(BluetoothDevice bluetoothDevice) throws IOException
     {
-        Door door;
-        ConnectToSocket();
-        door = new BTExchangeRxJava(bluetoothSocket);
+        ConnectToSocket(bluetoothDevice);
+        Door door = new BTExchangeRxJava(bluetoothSocket);
 
         return door;
     }
 
-    public Door Connect(String adress) throws IOException
+    public Door Connect(String address) throws IOException
     {
-        BluetoothDevice bluetoothDevice = bluetoothHardwareAdapter.getRemoteDevice(adress);
-        Door door;
-        ConnectToSocket();
+        BluetoothDevice bluetoothDevice = bluetoothHardwareAdapter.getRemoteDevice(address);
+        ConnectToSocket(bluetoothDevice);
 
-        door = new BTExchangeRxJava(bluetoothSocket);
+        Door  door = new BTExchangeRxJava(bluetoothSocket);
 
         return door;
     }

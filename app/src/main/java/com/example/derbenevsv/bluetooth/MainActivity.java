@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         {
             try
             {
-                btHelper.Connect(adress);
+               door = btHelper.Connect(adress);
             }
 
             catch (IOException e)

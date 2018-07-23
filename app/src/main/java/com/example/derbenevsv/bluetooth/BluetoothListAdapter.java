@@ -21,8 +21,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     //private BluetoothDeviceListObserver bluetoothDeviceListObserver;ы
     private ArrayList<BluetoothDevice> bluetoothDevices;
 
-
-
+    private BluetoothDevice selectedDevice;
     private Disposable disposable;
 
     public BluetoothListAdapter()
@@ -80,7 +79,10 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public void onSuccess(BluetoothDevice o)
     {
         Log.d("OnScan", "Adapter found device");
-        bluetoothDevices.add(o);
+        if (!bluetoothDevices.contains(o))
+        {
+            bluetoothDevices.add(o);
+        }
         notifyDataSetChanged();
 
 
@@ -95,7 +97,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public void ClearDevices()
     {
         bluetoothDevices.clear();
+        notifyDataSetChanged();
     }
+
     class BluetoothVH extends RecyclerView.ViewHolder
     {
         private TextView tvName;
