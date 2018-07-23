@@ -21,13 +21,22 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     //private BluetoothDeviceListObserver bluetoothDeviceListObserver;ы
     private ArrayList<BluetoothDevice> bluetoothDevices;
 
-    private BluetoothDevice selectedDevice;
+    //private BluetoothDevice selectedDevice;
     private Disposable disposable;
+    private DeviceSelectable deviceSelectable;
+    private View.OnClickListener onClickListener;
+
 
     public BluetoothListAdapter()
     {
         //bluetoothDeviceListObserver = new BluetoothDeviceListObserver(this);
         bluetoothDevices = new ArrayList<>();
+        onClickListener = view ->
+        {
+            int i = (Integer) view.getTag();
+            Log.d("LOG", String.valueOf(i));
+            deviceSelectable.OnSelect(bluetoothDevices.get(i));
+        };
     }
 
     @NonNull
@@ -37,6 +46,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bluetooth_list_item, parent, false);
         BluetoothVH vh = new BluetoothVH(mView);
+        mView.setOnClickListener(onClickListener);
         return vh;
     }
 
@@ -44,9 +54,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
         BluetoothVH bluetoothVH = ((BluetoothVH) holder);
-
-        BluetoothDevice device = bluetoothDevices
-                .get(position);
+        bluetoothVH.setId(position);
+        BluetoothDevice device = bluetoothDevices.get(position);
         bluetoothVH.setTvMac(device.getAddress());
         bluetoothVH.setTvName(device.getName() + (device.getBondState() == BluetoothDevice.BOND_BONDED ? " (paired)" : ""));
     }
@@ -100,16 +109,29 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         notifyDataSetChanged();
     }
 
+
+    public interface DeviceSelectable
+    {
+        void OnSelect(BluetoothDevice bluetoothDevice);
+    }
+
     class BluetoothVH extends RecyclerView.ViewHolder
     {
         private TextView tvName;
         private TextView tvMac;
+        private View rootView;
 
         public BluetoothVH(View itemView)
         {
             super(itemView);
             tvMac = itemView.findViewById(R.id.tvMac);
             tvName = itemView.findViewById(R.id.tvName);
+            rootView = itemView;
+        }
+
+        public void setId(int newId)
+        {
+            rootView.setTag(newId);
         }
 
         public void setTvName(String tvName)
@@ -122,6 +144,4 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
             this.tvMac.setText(tvMac);
         }
     }
-
-
 }
