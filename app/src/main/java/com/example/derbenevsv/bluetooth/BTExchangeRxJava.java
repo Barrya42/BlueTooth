@@ -1,5 +1,6 @@
 package com.example.derbenevsv.bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import io.reactivex.observers.DisposableCompletableObserver;
 
-public class ExchangeRxJava
+public class BTExchangeRxJava implements Door
 {
     public static String COMMAND_OPEN_DOOR = "OpenDoor";
     public static String COMMAND_HELLO = "Hello";
@@ -27,7 +28,7 @@ public class ExchangeRxJava
     private DisposableCompletableObserver commandObserver;
 
 
-    public ExchangeRxJava(BluetoothSocket bluetoothSocket)
+    public BTExchangeRxJava(BluetoothSocket bluetoothSocket)
     {
 
         this.bluetoothSocket = bluetoothSocket;
