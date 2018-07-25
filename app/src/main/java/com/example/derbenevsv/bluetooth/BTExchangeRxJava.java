@@ -20,7 +20,7 @@ public class BTExchangeRxJava implements Door
 {
     public static String COMMAND_OPEN_DOOR = "OpenDoor";
     public static String COMMAND_HELLO = "Hello";
-    private static int RESPONSE_TIMEOUT = 3000;
+    private static int RESPONSE_TIMEOUT = 6000;
     //    private static String HELLO_RESPONSE = "HelloResp";
     //    private Queue<String> commandQueue;в
     private BluetoothSocket bluetoothSocket;
@@ -45,24 +45,33 @@ public class BTExchangeRxJava implements Door
             {
                 OutputStream outputStream = bluetoothSocket.getOutputStream();
                 outputStream.write(newCommand.getBytes());
-                outputStream.write('\r');//CR
-                outputStream.write('\n');//NR
+                //outputStream.write('\r');//CR
+                //outputStream.write('\n');//NR
                 //outputStream.close();
                 InputStream inputStream = bluetoothSocket.getInputStream();
                 Date time = new Date();
                 long startWait = time.getTime();
                 Response response = null;
+                String string = "";
                 //int i =inputStream.read();
                 do
                 {
+
+                    boolean readed = false;
                     if (inputStream.available() > 0)
                     {
+                        readed = true;
                         byte[] input = new byte[inputStream.available()];
                         inputStream.read(input);
-                        String string = new String(input);
+                        string += new String(input);
+
+//                        break;
+                        // TODO: 12.07.2018 Если отправляли команду "Привет", и пришел ответ, то нужно пометить флаг что поздоровались.
+                    }
+                    if (inputStream.available() == 0 && readed)
+                    {
                         response = new Response(200, string);
                         break;
-                        // TODO: 12.07.2018 Если отправляли команду "Привет", и пришел ответ, то нужно пометить флаг что поздоровались.
                     }
                 }
                 while ((new Date()).getTime() - startWait < RESPONSE_TIMEOUT);

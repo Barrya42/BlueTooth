@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(6, 8); // указываем пины RX и TX
+SoftwareSerial mySerial(2, 3); // указываем пины RX и TX
 int pinReley = 4;
 char openChar = '1';
 String helloStringFromPhone = "Hello";
@@ -39,6 +39,10 @@ void loop()
         isHelloed = true;
       }
     }
+    else
+    {
+      sendHelloed();
+    }
     request = ReciveRequest(); // читаем из software-порта
     if(request == OpenDoorCommand )
     {
@@ -69,8 +73,9 @@ if (Serial.available())
 
 String ReciveRequest()
 {
-  String str = Serial.readString();
+  String str = mySerial.readString();
   Serial.println(str);
+mySerial.flush();
   return str;
 }
 
@@ -78,6 +83,12 @@ void sendHello()
 {
   mySerial.println("200:Helloed");
 }
+
+void sendHelloed()
+{
+  mySerial.println("205:Helloed");
+}
+
 void sendNotHello()
 {
   mySerial.println("400:NotYetHelloed");

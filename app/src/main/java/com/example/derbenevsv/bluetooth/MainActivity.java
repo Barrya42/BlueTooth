@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 {
     BluetoothDevice bluetoothDevice;
 
-    String adress = "00:21:13:04:af:f2".toUpperCase();
-    //String adress = "00:18:e4:34:f0:2e".toUpperCase();
+    //String adress = "00:21:13:04:af:f2".toUpperCase();
+    String adress = "00:18:e4:34:f0:2e".toUpperCase();
     //BroadcastReceiverScan reciver;
     BluetoothListAdapter bluetoothListAdapter;
     private EditText etMac;
@@ -74,19 +74,22 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         {
             try
             {
-               door = btHelper.Connect(adress);
+                door = btHelper.Connect(adress);
             }
 
             catch (IOException e)
             {
                 e.printStackTrace();
             }
-            door.OpenDoor()
-                    .observeOn(Schedulers.io())
-                    .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(e ->
-                            Log.d("LOG", e.toString()), throwable ->
-                            throwable.printStackTrace());
+            if (door != null)
+            {
+                door.OpenDoor()
+                        .observeOn(Schedulers.io())
+                        .subscribeOn(AndroidSchedulers.mainThread())
+                        .subscribe(e ->
+                                Log.d("LOG", e.toString()), throwable ->
+                                throwable.printStackTrace());
+            }
         });
 
 

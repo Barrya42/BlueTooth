@@ -35,7 +35,10 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         {
             int i = (Integer) view.getTag();
             Log.d("LOG", String.valueOf(i));
-            deviceSelectable.OnSelect(bluetoothDevices.get(i));
+            if (deviceSelectable != null)
+            {
+                deviceSelectable.OnSelect(bluetoothDevices.get(i));
+            }
         };
     }
 
