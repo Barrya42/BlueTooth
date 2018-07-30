@@ -1,13 +1,17 @@
+#define RespLength 2
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(2, 3); // указываем пины RX и TX
+SoftwareSerial BTSerial(2, 3); // указываем пины RX и TX
 int pinReley = 4;
 char openChar = '1';
-String helloStringFromPhone = "Hello";
-String OpenDoorCommand = "OpenDoor";
+byte helloFromPhone[] = {0x02, 0x01};
+byte OpenDoorCommand[] = {0x02, 0x05};
+byte Helloed[] = {0x0E, 0x00};
+byte Hello[] = {0x0E, 0x01};
+byte NotYetHelloed[RespLength] = {0x0E, 0x02};
 bool isHelloed = false;
 long openMoment;
-String request;
+byte request[RespLength];
 long openDelay = 6000;
 void setup()
 {
@@ -17,7 +21,7 @@ void setup()
 //pinMode(2,INPUT);
 //pinMode(3,OUTPUT);
 Serial.begin(9600);
-mySerial.begin(9600);
+BTSerial.begin(9600);
 }
 
 
@@ -27,24 +31,28 @@ void loop()
   {
     digitalWrite(pinReley,LOW);
   }
-  if (mySerial.available())
+  if (BTSerial.available())
   {
     if(!isHelloed)
     {
-      request = ReciveRequest();
-      if(request == helloStringFromPhone)
+      ReciveRequest();
+      if(CompareArrays(request, helloFromPhone))
       //if("11" == "11")
       {
         sendHello();
         isHelloed = true;
+      }
+      else
+      {
+        sendNotHello();
       }
     }
     else
     {
       sendHelloed();
     }
-    request = ReciveRequest(); // читаем из software-порта
-    if(request == OpenDoorCommand )
+    ReciveRequest(); // читаем из software-порта
+    if(CompareArrays(request, OpenDoorCommand ))
     {
       if(isHelloed)
       {
@@ -56,14 +64,14 @@ void loop()
         sendNotHello();
       }
     }
-    
+   Serial.write(request,RespLength); 
   }
   
 //Если вдруг с PC команду нужно отправить
 if (Serial.available())
 {
   int pcData = Serial.read(); // читаем из hardware-порта
-  mySerial.println(pcData); // пишем в software-порт
+  BTSerial.println(pcData); // пишем в software-порт
   
 }
 
@@ -71,27 +79,44 @@ if (Serial.available())
 //Serial.println(request); // пишем в hardware-порт
 }
 
-String ReciveRequest()
+void ReciveRequest()
 {
-  String str = mySerial.readString();
-  Serial.println(str);
-mySerial.flush();
-  return str;
+    while(BTSerial.available())
+    {
+      Serial.write(BTSerial.read());
+    }
+  //String str = BTSerial.readString();
+  BTSerial.readBytes(request, RespLength);
+  Serial.write(request,RespLength);
+
+  //BTSerial.flush();
+  
 }
 
 void sendHello()
 {
-  mySerial.println("200:Helloed");
+  BTSerial.write(Hello,RespLength);
+  
 }
 
 void sendHelloed()
 {
-  mySerial.println("205:Helloed");
+  BTSerial.write(Helloed,RespLength);
 }
 
 void sendNotHello()
 {
-  mySerial.println("400:NotYetHelloed");
+  BTSerial.write(NotYetHelloed,RespLength);
+}
+
+bool CompareArrays(byte* response, byte* tamplate)
+{
+  for(int i =0;i<=RespLength-1;i++)
+  {
+    if(response[i] != tamplate[i])
+    return false;
+  }
+  return true;
 }
 
 //8C3A:E3:ED8235
