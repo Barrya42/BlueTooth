@@ -17,11 +17,10 @@ public class BTHelper
 {
     private static String myUUID = "00001101-0000-1000-8000-00805F9B34FB";
     private final BluetoothAdapter bluetoothHardwareAdapter;
-    BluetoothSocket bluetoothSocket;
-    BroadcastReceiver receiver;
-    Context context;
+    private BluetoothSocket bluetoothSocket;
+    private BroadcastReceiver receiver;
+    private Context context;
     private BluetoothListAdapter bluetoothListAdapter;
-    //private BluetoothDevice bluetoothDevice;
 
     BTHelper(Context context, BluetoothListAdapter bluetoothListAdapter)
     {
@@ -44,7 +43,7 @@ public class BTHelper
         }
     }
 
-    public Single<Door> Connect(BluetoothDevice bluetoothDevice) throws IOException
+    public Single<Door> Connect(BluetoothDevice bluetoothDevice)
     {
         return Single.fromCallable(() ->
         {
@@ -53,7 +52,7 @@ public class BTHelper
         });
     }
 
-    public Single<Door> Connect(String address) throws IOException
+    public Single<Door> Connect(String address)
     {
 
         return Single.fromCallable(() ->
@@ -84,5 +83,9 @@ public class BTHelper
             context.registerReceiver(receiver, intentFilter);
             bluetoothHardwareAdapter.startDiscovery();
         }
+    }
+    public boolean isConnected()
+    {
+        return bluetoothSocket != null && bluetoothSocket.isConnected();
     }
 }
