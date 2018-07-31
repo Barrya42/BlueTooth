@@ -8,9 +8,9 @@ import android.content.Context;
 import android.content.IntentFilter;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
+import io.reactivex.Single;
 import io.reactivex.functions.Action;
 
 public class BTHelper
@@ -35,24 +35,6 @@ public class BTHelper
     {
         if (bluetoothSocket == null)
         {
-//            try
-//            {
-//                bluetoothSocket = (BluetoothSocket) bluetoothDevice.getClass()
-//                        .getMethod("createRfcommSocket", new Class[]{int.class})
-//                        .invoke(bluetoothDevice, 1);
-//            }
-//            catch (IllegalAccessException e)
-//            {
-//                e.printStackTrace();
-//            }
-//            catch (InvocationTargetException e)
-//            {
-//                e.printStackTrace();
-//            }
-//            catch (NoSuchMethodException e)
-//            {
-//                e.printStackTrace();
-//            }
             bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString(myUUID));
         }
 
@@ -62,22 +44,23 @@ public class BTHelper
         }
     }
 
-    public Door Connect(BluetoothDevice bluetoothDevice) throws IOException
+    public Single<Door> Connect(BluetoothDevice bluetoothDevice) throws IOException
     {
-        ConnectToSocket(bluetoothDevice);
-        Door door = new BTExchangeRxJava(bluetoothSocket);
-
-        return door;
+        return Single.fromCallable(() ->
+        {
+            ConnectToSocket(bluetoothDevice);
+            return new BTExchangeRxJava(bluetoothSocket);
+        });
     }
 
-    public Door Connect(String address) throws IOException
+    public Single<Door> Connect(String address) throws IOException
     {
-        BluetoothDevice bluetoothDevice = bluetoothHardwareAdapter.getRemoteDevice(address);
-        ConnectToSocket(bluetoothDevice);
 
-        Door  door = new BTExchangeRxJava(bluetoothSocket);
-
-        return door;
+        return Single.fromCallable(() ->
+        {
+            ConnectToSocket(bluetoothHardwareAdapter.getRemoteDevice(address));
+            return new BTExchangeRxJava(bluetoothSocket);
+        });
     }
 
     public void StartScan(Action onFinish)

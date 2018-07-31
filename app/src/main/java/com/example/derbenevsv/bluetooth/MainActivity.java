@@ -75,7 +75,11 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         {
             try
             {
-                door = btHelper.Connect(adress);
+                toDispose.add(btHelper.Connect(adress)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(d ->
+                                door = d));
             }
 
             catch (IOException e)
@@ -84,12 +88,12 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
             }
             if (door != null)
             {
-                door.OpenDoor()
+                toDispose.add(door.OpenDoor()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
                         .subscribe(e ->
                                 Log.d("LOG", e.toString()), throwable ->
-                                throwable.printStackTrace());
+                                throwable.printStackTrace()));
             }
         });
 
