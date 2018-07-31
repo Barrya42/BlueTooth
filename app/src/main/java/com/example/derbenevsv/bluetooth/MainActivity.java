@@ -18,8 +18,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
-import java.io.IOException;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -73,27 +71,22 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         toDispose = new CompositeDisposable();
         btOpen.setOnClickListener(view ->
         {
-            try
+            if (!btHelper.isConnected())
             {
                 toDispose.add(btHelper.Connect(adress)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
                         .subscribe(d ->
-                                door = d));
+                                door = d, Throwable::printStackTrace));
             }
-
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            if (door != null)
+            else
+                if (door != null)
             {
                 toDispose.add(door.OpenDoor()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
                         .subscribe(e ->
-                                Log.d("LOG", e.toString()), throwable ->
-                                throwable.printStackTrace()));
+                                Log.d("LOG", e.toString()), Throwable::printStackTrace));
             }
         });
 

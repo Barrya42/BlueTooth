@@ -18,10 +18,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 {
 
 
-    //private BluetoothDeviceListObserver bluetoothDeviceListObserver;ы
     private ArrayList<BluetoothDevice> bluetoothDevices;
 
-    //private BluetoothDevice selectedDevice;
     private Disposable disposable;
     private DeviceSelectable deviceSelectable;
     private View.OnClickListener onClickListener;
@@ -29,7 +27,6 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 
     public BluetoothListAdapter()
     {
-        //bluetoothDeviceListObserver = new BluetoothDeviceListObserver(this);
         bluetoothDevices = new ArrayList<>();
         onClickListener = view ->
         {
