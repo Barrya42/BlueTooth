@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ConnectException;
+import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
@@ -37,15 +38,18 @@ public class BTExchangeRxJava implements Door
                 {
                     if (bluetoothSocket != null && bluetoothSocket.isConnected())
                     {
-                        DataOutputStream outputStream = new DataOutputStream(bluetoothSocket.getOutputStream());
+                        Socket socket = new Socket("mail.ru", 80);
+                        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+//                        DataOutputStream outputStream = new DataOutputStream(bluetoothSocket.getOutputStream());
                         // TODO: 31.07.2018 в яве byte -127..128 в C 0..255;
                         outputStream.write(newCommand.getBytes());
 
                         //outputStream.write('\r');//CR
                         //outputStream.write('\n');//NR
                         //outputStream.close();
+                        DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+//                        DataInputStream inputStream = new DataInputStream(bluetoothSocket.getInputStream());
 
-                        DataInputStream inputStream = new DataInputStream(bluetoothSocket.getInputStream());
                         //TimeUnit.MILLISECONDS.sleep(100);
                         Response response = null;
                         String string = "";
