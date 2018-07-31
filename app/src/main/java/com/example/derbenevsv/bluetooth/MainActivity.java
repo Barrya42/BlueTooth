@@ -22,7 +22,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener
+public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener, BluetoothListAdapter.DeviceSelectable
 {
     BluetoothDevice bluetoothDevice;
 
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         constraintLayout = findViewById(R.id.mainLayout);
         rvDevices = findViewById(R.id.rvDevices);
         bluetoothListAdapter = new BluetoothListAdapter();
+        bluetoothListAdapter.setDeviceSelectable(this);
         btHelper = new BTHelper(this, bluetoothListAdapter);
         rvDevices.setAdapter(bluetoothListAdapter);
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
@@ -79,8 +80,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                         .subscribe(d ->
                                 door = d, Throwable::printStackTrace));
             }
-            else
-                if (door != null)
+            else if (door != null)
             {
                 toDispose.add(door.OpenDoor()
                         .observeOn(AndroidSchedulers.mainThread())
@@ -185,5 +185,13 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         bluetoothListAdapter.ClearDevices();
         StartScan();
         Log.d("OnScan", "Activity finish scan");
+    }
+
+    @Override
+    public void OnSelect(BluetoothDevice bluetoothDevice)
+    {
+        Snackbar.make(constraintLayout, bluetoothDevice.toString(),
+                Snackbar.LENGTH_SHORT)
+                .show();
     }
 }

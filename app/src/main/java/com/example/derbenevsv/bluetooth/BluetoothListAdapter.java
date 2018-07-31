@@ -53,9 +53,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
+        BluetoothDevice device = bluetoothDevices.get(position);
         BluetoothVH bluetoothVH = ((BluetoothVH) holder);
         bluetoothVH.setId(position);
-        BluetoothDevice device = bluetoothDevices.get(position);
         bluetoothVH.setTvMac(device.getAddress());
         bluetoothVH.setTvName(device.getName() + (device.getBondState() == BluetoothDevice.BOND_BONDED ? " (paired)" : ""));
     }
@@ -109,6 +109,10 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         notifyDataSetChanged();
     }
 
+    public void setDeviceSelectable(DeviceSelectable deviceSelectable)
+    {
+        this.deviceSelectable = deviceSelectable;
+    }
 
     public interface DeviceSelectable
     {
@@ -119,6 +123,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     {
         private TextView tvName;
         private TextView tvMac;
+
+
         private View rootView;
 
         public BluetoothVH(View itemView)
