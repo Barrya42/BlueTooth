@@ -85,8 +85,14 @@ public class BTHelper
             bluetoothHardwareAdapter.startDiscovery();
         }
     }
+
     public boolean isConnected()
     {
         return bluetoothSocket != null && bluetoothSocket.isConnected();
+    }
+
+    public void Close() throws IOException
+    {
+        bluetoothSocket.close();
     }
 }

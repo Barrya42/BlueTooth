@@ -4,7 +4,6 @@ import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
@@ -14,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -23,7 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener, BluetoothListAdapter.DeviceSelectable
+public class MainActivity extends AppCompatActivity implements CheckBox.OnCheckedChangeListener, BluetoothListAdapter.DeviceInteractable
 {
     BluetoothDevice bluetoothDevice;
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     //    private ExchangeRxJava exchangeTask;
     private Door door;
     private BTHelper btHelper;
-    private Button btOpen;
+    private Button btOpenByAddress;
     private ConstraintLayout constraintLayout;
     private RecyclerView rvDevices;
     private int ACCESS_COARSE_LOCATION_PERMISSION = 15;
@@ -60,18 +60,18 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                 StartScan();
             }
         });
-        btOpen = findViewById(R.id.btOpen);
+        btOpenByAddress = findViewById(R.id.btOpenByAddress);
         cbAutoOPen.setOnCheckedChangeListener(this);
         constraintLayout = findViewById(R.id.mainLayout);
         rvDevices = findViewById(R.id.rvDevices);
         bluetoothListAdapter = new BluetoothListAdapter();
-        bluetoothListAdapter.setDeviceSelectable(this);
+        bluetoothListAdapter.setDeviceInteractable(this);
         btHelper = new BTHelper(this, bluetoothListAdapter);
         rvDevices.setAdapter(bluetoothListAdapter);
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
 
         toDispose = new CompositeDisposable();
-        btOpen.setOnClickListener(view ->
+        btOpenByAddress.setOnClickListener(view ->
         {
             if (!btHelper.isConnected())
             {
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                         .subscribe(d ->
                                 door = d, Throwable::printStackTrace));
             }
+
             else if (door != null)
             {
                 toDispose.add(door.OpenDoor()
@@ -189,10 +190,35 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     }
 
     @Override
-    public void OnSelect(BluetoothDevice bluetoothDevice)
+    public void OnClickConnect(View view, BluetoothDevice bluetoothDevice)
     {
-        Snackbar.make(constraintLayout, bluetoothDevice.toString(),
+        Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Connect",
                 Snackbar.LENGTH_SHORT)
                 .show();
+//        if (!btHelper.isConnected())
+//        {
+//            toDispose.add(btHelper.Connect(adress)
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeOn(Schedulers.io())
+//                    .subscribe(d ->
+//                            door = d, Throwable::printStackTrace));
+//        }
+    }
+
+    @Override
+    public void OnClickOpen(View view, BluetoothDevice bluetoothDevice)
+    {
+        Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Open",
+                Snackbar.LENGTH_SHORT)
+                .show();
+
+//        if (door != null)
+//        {
+//            toDispose.add(door.OpenDoor()
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeOn(Schedulers.io())
+//                    .subscribe(e ->
+//                            Log.d("LOG", e.toString()), Throwable::printStackTrace));
+//        }
     }
 }

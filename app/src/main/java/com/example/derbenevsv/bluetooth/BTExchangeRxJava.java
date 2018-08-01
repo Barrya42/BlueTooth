@@ -21,7 +21,6 @@ public class BTExchangeRxJava implements Door
     //    private Queue<String> commandQueue;в
     private BluetoothSocket bluetoothSocket;
     private boolean isHelloed = false;
-    private DisposableCompletableObserver commandObserver;
 
 
     public BTExchangeRxJava(BluetoothSocket bluetoothSocket)
