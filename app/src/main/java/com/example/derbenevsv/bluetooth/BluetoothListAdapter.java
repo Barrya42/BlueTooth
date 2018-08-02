@@ -29,22 +29,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public BluetoothListAdapter()
     {
         bluetoothDevices = new ArrayList<>();
-        onClickOpenListener = view ->
-        {
-            int i = (Integer) ((View)view.getParent()).getTag();
-            if (deviceInteractable != null)
-            {
-                deviceInteractable.OnClickOpen(view, bluetoothDevices.get(i));
-            }
-        };
-        onClickConnectListener = view ->
-        {
-            int i = (Integer) ((View)view.getParent()).getTag();
-            if (deviceInteractable != null)
-            {
-                deviceInteractable.OnClickConnect(view, bluetoothDevices.get(i));
-            }
-        };
+
     }
 
     @NonNull
@@ -54,6 +39,28 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bluetooth_list_item, parent, false);
         BluetoothVH vh = new BluetoothVH(mView);
+        if (onClickOpenListener == null)
+        {
+            onClickOpenListener = view ->
+            {
+                int i = (Integer) (mView).getTag();
+                if (deviceInteractable != null)
+                {
+                    deviceInteractable.OnClickOpen(vh, bluetoothDevices.get(i));
+                }
+            };
+        }
+        if (onClickConnectListener == null)
+        {
+            onClickConnectListener = view ->
+            {
+                int i = (Integer) (mView).getTag();
+                if (deviceInteractable != null)
+                {
+                    deviceInteractable.OnClickConnect(vh, bluetoothDevices.get(i));
+                }
+            };
+        }
         vh.setOnConnectClickListener(onClickConnectListener);
         vh.setOnOpenClickListener(onClickOpenListener);
         return vh;
@@ -125,9 +132,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 
     public interface DeviceInteractable
     {
-        void OnClickConnect(View view, BluetoothDevice bluetoothDevice);
+        void OnClickConnect(BluetoothVH vh, BluetoothDevice bluetoothDevice);
 
-        void OnClickOpen(View view, BluetoothDevice bluetoothDevice);
+        void OnClickOpen(BluetoothVH vh, BluetoothDevice bluetoothDevice);
     }
 
     class BluetoothVH extends RecyclerView.ViewHolder
@@ -137,6 +144,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 
         private View btConnect;
         private View btOpen;
+        private View pbConnecting;
 
         private View rootView;
 
@@ -147,6 +155,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
             tvName = itemView.findViewById(R.id.tvName);
             btConnect = itemView.findViewById(R.id.btConnect);
             btOpen = itemView.findViewById(R.id.btOpen);
+            pbConnecting = itemView.findViewById(R.id.pbConnecting);
             rootView = itemView;
         }
 
@@ -173,6 +182,22 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         public void setOnOpenClickListener(View.OnClickListener onOpenClickListener)
         {
             btOpen.setOnClickListener(onOpenClickListener);
+        }
+
+        public void setConnectingProgressBarVisibility(int visibility)
+        {
+            pbConnecting.setVisibility(visibility);
+//            btConnect.setVisibility(visibility == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+        }
+
+        public View getBtConnect()
+        {
+            return btConnect;
+        }
+
+        public View getBtOpen()
+        {
+            return btOpen;
         }
     }
 }

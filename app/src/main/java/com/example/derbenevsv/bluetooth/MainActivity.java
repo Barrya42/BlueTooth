@@ -190,35 +190,57 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     }
 
     @Override
-    public void OnClickConnect(View view, BluetoothDevice bluetoothDevice)
+    public void OnClickConnect(BluetoothListAdapter.BluetoothVH vh, BluetoothDevice bluetoothDevice)
     {
         Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Connect",
                 Snackbar.LENGTH_SHORT)
                 .show();
-//        if (!btHelper.isConnected())
-//        {
-//            toDispose.add(btHelper.Connect(adress)
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe(d ->
-//                            door = d, Throwable::printStackTrace));
-//        }
+        vh.setConnectingProgressBarVisibility(View.VISIBLE);
+        vh.getBtConnect().setVisibility(View.INVISIBLE);
+        if (!btHelper.isConnected())
+        {
+            toDispose.add(btHelper.Connect(adress)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(d ->
+                            {
+                                door = d;
+                                vh.setConnectingProgressBarVisibility(View.GONE);
+                                vh.getBtConnect().setVisibility(View.VISIBLE);
+                                vh.getBtConnect().setEnabled(false);
+                                vh.getBtOpen().setEnabled(true);
+                            }, throwable ->
+                            {
+                                vh.setConnectingProgressBarVisibility(View.GONE);
+                                vh.getBtConnect().setVisibility(View.VISIBLE);
+                                Snackbar.make(constraintLayout, throwable.getMessage(),
+                                        Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }
+                    ));
+        }
     }
 
     @Override
-    public void OnClickOpen(View view, BluetoothDevice bluetoothDevice)
+    public void OnClickOpen(BluetoothListAdapter.BluetoothVH vh, BluetoothDevice bluetoothDevice)
     {
-        Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Open",
-                Snackbar.LENGTH_SHORT)
-                .show();
+//        Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Open",
+//                Snackbar.LENGTH_SHORT)
+//                .show();
 
-//        if (door != null)
-//        {
-//            toDispose.add(door.OpenDoor()
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribeOn(Schedulers.io())
-//                    .subscribe(e ->
-//                            Log.d("LOG", e.toString()), Throwable::printStackTrace));
-//        }
+        if (door != null)
+        {
+            toDispose.add(door.OpenDoor()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(e ->
+                                    Log.d("LOG", e.toString()),
+                            throwable ->
+                            {
+                                Snackbar.make(constraintLayout, throwable.getMessage(),
+                                        Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }));
+        }
     }
 }

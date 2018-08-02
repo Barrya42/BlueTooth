@@ -48,7 +48,17 @@ public class BTHelper
     {
         return Single.fromCallable(() ->
         {
-            ConnectToSocket(bluetoothDevice);
+            try
+            {
+                ConnectToSocket(bluetoothDevice);
+            }
+            catch (IOException e)
+            {
+                //throw new RuntimeException(e.getMessage()).addSuppressed(e);
+                IOException tr = new IOException("Не удалось подключиться.");
+                tr.addSuppressed(e);
+                throw tr;
+            }
             return new BTExchangeRxJava(bluetoothSocket);
         });
     }
@@ -56,9 +66,20 @@ public class BTHelper
     public Single<Door> Connect(String address)
     {
 
+
         return Single.fromCallable(() ->
         {
-            ConnectToSocket(bluetoothHardwareAdapter.getRemoteDevice(address));
+            try
+            {
+                ConnectToSocket(bluetoothHardwareAdapter.getRemoteDevice(address));
+            }
+            catch (IOException e)
+            {
+                //throw new RuntimeException(e.getMessage()).addSuppressed(e);
+                IOException tr = new IOException("Не удалось подключиться.");
+                tr.addSuppressed(e);
+                throw tr;
+            }
             return new BTExchangeRxJava(bluetoothSocket);
         });
     }
@@ -71,7 +92,6 @@ public class BTHelper
             {
                 receiver = new BroadcastReceiverScan(bluetoothListAdapter, onFinish);
             }
-
 
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -91,7 +111,7 @@ public class BTHelper
         return bluetoothSocket != null && bluetoothSocket.isConnected();
     }
 
-    public void Close() throws IOException
+    public void CloseConnection() throws IOException
     {
         bluetoothSocket.close();
     }

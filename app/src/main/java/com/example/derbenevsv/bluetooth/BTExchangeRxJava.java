@@ -75,7 +75,7 @@ public class BTExchangeRxJava implements Door
                     else
                     {
                         emitter.onError(new ConnectException("Connection with: " + bluetoothSocket.getRemoteDevice()
-                                .getName() + " lost"));
+                                .getName() + " not established"));
                     }
                 });
         return data.timeout(RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS)
