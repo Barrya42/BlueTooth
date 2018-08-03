@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
         if (door != null)
         {
-            toDispose.add(door.OpenDoor()
+            door.OpenDoor()
                               .observeOn(AndroidSchedulers.mainThread())
                               .subscribeOn(Schedulers.io())
                               .subscribe(e ->
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                                           Snackbar.make(constraintLayout, throwable.getMessage(),
                                                   Snackbar.LENGTH_SHORT)
                                                   .show();
-                                      }));
+                                      });
         }
     }
 }

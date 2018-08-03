@@ -115,8 +115,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         if (!bluetoothDevices.contains(o))
         {
             bluetoothDevices.add(o);
+            notifyItemInserted(bluetoothDevices.size()-1);
         }
-        notifyItemInserted(bluetoothDevices.size()-1);
+
 //        notifyDataSetChanged();
 
 
