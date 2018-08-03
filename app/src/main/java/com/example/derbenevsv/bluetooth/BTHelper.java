@@ -15,21 +15,30 @@ import io.reactivex.functions.Action;
 
 public class BTHelper
 {
+    public static int STATE_IDLE = 0x0;
+    public static int STATE_CONNECTED = 0x2;
+    public static int STATE_CONNECTING = 0x3;
     private static String myUUID = "00001101-0000-1000-8000-00805F9B34FB";
     private final BluetoothAdapter bluetoothHardwareAdapter;
     private BluetoothSocket bluetoothSocket;
     private BroadcastReceiver receiver;
     private Context context;
     private BluetoothListAdapter bluetoothListAdapter;
+    private int BTstate;
 
     // TODO: 31.07.2018 Реализовать запрос на спаривание
     BTHelper(Context context, BluetoothListAdapter bluetoothListAdapter)
     {
+        BTstate = STATE_IDLE;
         this.context = context;
         bluetoothHardwareAdapter = BluetoothAdapter.getDefaultAdapter();
         this.bluetoothListAdapter = bluetoothListAdapter;
     }
 
+    public int getBTstate()
+    {
+        return BTstate;
+    }
 
     private void ConnectToSocket(BluetoothDevice bluetoothDevice) throws IOException
     {
@@ -40,7 +49,18 @@ public class BTHelper
 
         if (!bluetoothSocket.isConnected())
         {
-            bluetoothSocket.connect();
+            BTstate = STATE_CONNECTING;
+            try
+            {
+                bluetoothSocket.connect();
+                BTstate = STATE_CONNECTED;
+            }
+            catch (IOException e)
+            {
+                BTstate = STATE_IDLE;
+                throw e;
+            }
+
         }
     }
 
@@ -95,8 +115,8 @@ public class BTHelper
 
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
-            intentFilter.addAction(BluetoothDevice.ACTION_UUID);
-            intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+            //intentFilter.addAction(BluetoothDevice.ACTION_UUID);
+            //intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
             intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
             //unregisterReceiver(receiver.getReceiver());

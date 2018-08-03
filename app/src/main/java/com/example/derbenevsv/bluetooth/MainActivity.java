@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
     private void OnScanFinish()
     {
-        bluetoothListAdapter.ClearDevices();
+        bluetoothListAdapter.ClearDevices(true);
         StartScan();
         Log.d("OnScan", "Activity finish scan");
     }
@@ -192,27 +192,43 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     @Override
     public void OnClickConnect(BluetoothListAdapter.BluetoothVH vh, BluetoothDevice bluetoothDevice)
     {
-        Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Connect",
-                Snackbar.LENGTH_SHORT)
-                .show();
-        vh.setConnectingProgressBarVisibility(View.VISIBLE);
-        vh.getBtConnect().setVisibility(View.INVISIBLE);
-        if (!btHelper.isConnected())
+
+        //toDispose.dispose();
+        if (toDispose.size() > 10)
         {
+            toDispose.dispose();
+            toDispose = new CompositeDisposable();
+        }
+        if (!btHelper.isConnected() && btHelper.getBTstate() != BTHelper.STATE_CONNECTING)
+        {
+            Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Connect",
+                    Snackbar.LENGTH_SHORT)
+                    .show();
+            Log.d("LOG", String.valueOf(btHelper.getBTstate()));
+            vh.getPbConnecting()
+                    .setVisibility(View.VISIBLE);
+            vh.getBtConnect()
+                    .setVisibility(View.INVISIBLE);
             toDispose.add(btHelper.Connect(adress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(d ->
                             {
                                 door = d;
-                                vh.setConnectingProgressBarVisibility(View.GONE);
-                                vh.getBtConnect().setVisibility(View.VISIBLE);
-                                vh.getBtConnect().setEnabled(false);
-                                vh.getBtOpen().setEnabled(true);
+                                vh.getPbConnecting()
+                                        .setVisibility(View.GONE);
+                                vh.getBtConnect()
+                                        .setVisibility(View.VISIBLE);
+                                vh.getBtConnect()
+                                        .setEnabled(false);
+                                vh.getBtOpen()
+                                        .setEnabled(true);
                             }, throwable ->
                             {
-                                vh.setConnectingProgressBarVisibility(View.GONE);
-                                vh.getBtConnect().setVisibility(View.VISIBLE);
+                                vh.getPbConnecting()
+                                        .setVisibility(View.GONE);
+                                vh.getBtConnect()
+                                        .setVisibility(View.VISIBLE);
                                 Snackbar.make(constraintLayout, throwable.getMessage(),
                                         Snackbar.LENGTH_SHORT)
                                         .show();

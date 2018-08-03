@@ -10,6 +10,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 
@@ -17,7 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 public class BroadcastReceiverScan extends BroadcastReceiver
 {
     private SingleObserver<BluetoothDevice> observer;
-
+    private Disposable disposable;
     private Action completableObserver;
 
     public BroadcastReceiverScan(SingleObserver<BluetoothDevice> bluetoothDeviceListObserver, Action onFinish)
@@ -33,7 +34,7 @@ public class BroadcastReceiverScan extends BroadcastReceiver
         if (intent.getAction()
                 .equals(BluetoothDevice.ACTION_FOUND))
         {
-            Single.just((BluetoothDevice) intent.getExtras()
+          Single.just((BluetoothDevice) intent.getExtras()
                     .get(BluetoothDevice.EXTRA_DEVICE))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -43,8 +44,11 @@ public class BroadcastReceiverScan extends BroadcastReceiver
         else if (intent.getAction()
                 .equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED))
         {
-
-            Completable.complete()
+            if (disposable != null)
+            {
+                disposable.dispose();
+            }
+            disposable = Completable.complete()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(completableObserver);

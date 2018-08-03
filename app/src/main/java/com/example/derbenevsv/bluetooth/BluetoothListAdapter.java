@@ -1,6 +1,8 @@
 package com.example.derbenevsv.bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
@@ -18,9 +22,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 {
 
 
-    private ArrayList<BluetoothDevice> bluetoothDevices;
+    private List<BluetoothDevice> bluetoothDevices;
 
-    private Disposable disposable;
+    private Disposable disposableSource;
     private DeviceInteractable deviceInteractable;
     private View.OnClickListener onClickConnectListener;
     private View.OnClickListener onClickOpenListener;
@@ -29,6 +33,13 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public BluetoothListAdapter()
     {
         bluetoothDevices = new ArrayList<>();
+
+        //Добавим спаренные устройства поумолчанию
+        for (BluetoothDevice bluetoothDevice : BluetoothAdapter.getDefaultAdapter()
+                .getBondedDevices())
+        {
+            bluetoothDevices.add(bluetoothDevice);
+        }
 
     }
 
@@ -39,30 +50,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         View mView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bluetooth_list_item, parent, false);
         BluetoothVH vh = new BluetoothVH(mView);
-        if (onClickOpenListener == null)
-        {
-            onClickOpenListener = view ->
-            {
-                int i = (Integer) (mView).getTag();
-                if (deviceInteractable != null)
-                {
-                    deviceInteractable.OnClickOpen(vh, bluetoothDevices.get(i));
-                }
-            };
-        }
-        if (onClickConnectListener == null)
-        {
-            onClickConnectListener = view ->
-            {
-                int i = (Integer) (mView).getTag();
-                if (deviceInteractable != null)
-                {
-                    deviceInteractable.OnClickConnect(vh, bluetoothDevices.get(i));
-                }
-            };
-        }
-        vh.setOnConnectClickListener(onClickConnectListener);
-        vh.setOnOpenClickListener(onClickOpenListener);
+
         return vh;
     }
 
@@ -71,9 +59,29 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     {
         BluetoothDevice device = bluetoothDevices.get(position);
         BluetoothVH bluetoothVH = ((BluetoothVH) holder);
-        bluetoothVH.setId(position);
+        View root = bluetoothVH.getRootView();
+        root.setTag(position);
         bluetoothVH.setTvMac(device.getAddress());
         bluetoothVH.setTvName(device.getName() + (device.getBondState() == BluetoothDevice.BOND_BONDED ? " (paired)" : ""));
+
+        bluetoothVH.getBtConnect()
+                .setOnClickListener(view ->
+                {
+                    int i = (Integer) (root).getTag();
+                    if (deviceInteractable != null)
+                    {
+                        deviceInteractable.OnClickConnect(bluetoothVH, bluetoothDevices.get(i));
+                    }
+                });
+        bluetoothVH.getBtOpen()
+                .setOnClickListener(view ->
+                {
+                    int i = (Integer) (root).getTag();
+                    if (deviceInteractable != null)
+                    {
+                        deviceInteractable.OnClickOpen(bluetoothVH, bluetoothDevices.get(i));
+                    }
+                });
     }
 
     @Override
@@ -93,11 +101,11 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     @Override
     public void onSubscribe(Disposable d)
     {
-        if (disposable != null)
+        if (disposableSource != null)
         {
-            disposable.dispose();
+            disposableSource.dispose();
         }
-        disposable = d;
+        disposableSource = d;
     }
 
     @Override
@@ -108,7 +116,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         {
             bluetoothDevices.add(o);
         }
-        notifyDataSetChanged();
+        notifyItemChanged(bluetoothDevices.size()-1);
+//        notifyDataSetChanged();
 
 
     }
@@ -119,10 +128,36 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 
     }
 
-    public void ClearDevices()
+    public void ClearDevices(boolean RemoveOnlyNotPaired)
     {
-        bluetoothDevices.clear();
-        notifyDataSetChanged();
+        if (RemoveOnlyNotPaired)
+        {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            {
+                for (int i = 0; i <= bluetoothDevices.size() - 1; i++)
+                {
+                    BluetoothDevice bluetoothDevice = bluetoothDevices.get(i);
+                    if (bluetoothDevice.getBondState() != bluetoothDevice.BOND_BONDED)
+                    {
+                        bluetoothDevices.remove(bluetoothDevice);
+                        notifyItemChanged(i);
+                    }
+                }
+            }
+            else
+            {
+                bluetoothDevices = bluetoothDevices.stream()
+                        .filter(bt -> bt.getBondState() == BluetoothDevice.BOND_BONDED)
+                        .collect(Collectors.toList());
+                notifyDataSetChanged();
+            }
+        }
+        else
+        {
+            bluetoothDevices.clear();
+            notifyDataSetChanged();
+        }
+
     }
 
     public void setDeviceInteractable(DeviceInteractable deviceInteractable)
@@ -159,9 +194,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
             rootView = itemView;
         }
 
-        public void setId(int newId)
+        public View getRootView()
         {
-            rootView.setTag(newId);
+            return rootView;
         }
 
         public void setTvName(String tvName)
@@ -174,20 +209,9 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
             this.tvMac.setText(tvMac);
         }
 
-        public void setOnConnectClickListener(View.OnClickListener onConnectClickListener)
+        public View getPbConnecting()
         {
-            btConnect.setOnClickListener(onConnectClickListener);
-        }
-
-        public void setOnOpenClickListener(View.OnClickListener onOpenClickListener)
-        {
-            btOpen.setOnClickListener(onOpenClickListener);
-        }
-
-        public void setConnectingProgressBarVisibility(int visibility)
-        {
-            pbConnecting.setVisibility(visibility);
-//            btConnect.setVisibility(visibility == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+            return pbConnecting;
         }
 
         public View getBtConnect()
