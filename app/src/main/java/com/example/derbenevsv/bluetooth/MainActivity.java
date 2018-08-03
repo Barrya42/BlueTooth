@@ -76,19 +76,19 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
             if (!btHelper.isConnected())
             {
                 toDispose.add(btHelper.Connect(adress)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(d ->
-                                door = d, Throwable::printStackTrace));
+                                      .observeOn(AndroidSchedulers.mainThread())
+                                      .subscribeOn(Schedulers.io())
+                                      .subscribe(d ->
+                                              door = d, Throwable::printStackTrace));
             }
 
             else if (door != null)
             {
                 toDispose.add(door.OpenDoor()
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(e ->
-                                Log.d("LOG", e.toString()), Throwable::printStackTrace));
+                                  .observeOn(AndroidSchedulers.mainThread())
+                                  .subscribeOn(Schedulers.io())
+                                  .subscribe(e ->
+                                          Log.d("LOG", e.toString()), Throwable::printStackTrace));
             }
         });
 
@@ -152,11 +152,13 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                     Manifest.permission.ACCESS_COARSE_LOCATION))
             {
                 // TODO: 12.07.2018 тут по идее должно быть описание зачем нам надо это разрешение
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION_PERMISSION);
+                ActivityCompat
+                        .requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION_PERMISSION);
             }
             else
             {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION_PERMISSION);
+                ActivityCompat
+                        .requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION_PERMISSION);
             }
 
             return false;
@@ -205,35 +207,27 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                     Snackbar.LENGTH_SHORT)
                     .show();
             Log.d("LOG", String.valueOf(btHelper.getBTstate()));
-            vh.getPbConnecting()
-                    .setVisibility(View.VISIBLE);
-            vh.getBtConnect()
-                    .setVisibility(View.INVISIBLE);
+            vh.getPbConnecting().setVisibility(View.VISIBLE);
+            vh.getBtConnect().setVisibility(View.INVISIBLE);
             toDispose.add(btHelper.Connect(adress)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(d ->
-                            {
-                                door = d;
-                                vh.getPbConnecting()
-                                        .setVisibility(View.GONE);
-                                vh.getBtConnect()
-                                        .setVisibility(View.VISIBLE);
-                                vh.getBtConnect()
-                                        .setEnabled(false);
-                                vh.getBtOpen()
-                                        .setEnabled(true);
-                            }, throwable ->
-                            {
-                                vh.getPbConnecting()
-                                        .setVisibility(View.GONE);
-                                vh.getBtConnect()
-                                        .setVisibility(View.VISIBLE);
-                                Snackbar.make(constraintLayout, throwable.getMessage(),
-                                        Snackbar.LENGTH_SHORT)
-                                        .show();
-                            }
-                    ));
+                                  .observeOn(AndroidSchedulers.mainThread())
+                                  .subscribeOn(Schedulers.io())
+                                  .subscribe(d ->
+                                          {
+                                              door = d;
+                                              vh.getPbConnecting().setVisibility(View.GONE);
+                                              vh.getBtConnect().setVisibility(View.VISIBLE);
+                                              vh.getBtConnect().setEnabled(false);
+                                              vh.getBtOpen().setEnabled(true);
+                                          }, throwable ->
+                                          {
+                                              vh.getPbConnecting().setVisibility(View.GONE);
+                                              vh.getBtConnect().setVisibility(View.VISIBLE);
+                                              Snackbar.make(constraintLayout, throwable.getMessage(),
+                                                      Snackbar.LENGTH_SHORT)
+                                                      .show();
+                                          }
+                                  ));
         }
     }
 
@@ -247,16 +241,16 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         if (door != null)
         {
             toDispose.add(door.OpenDoor()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(e ->
-                                    Log.d("LOG", e.toString()),
-                            throwable ->
-                            {
-                                Snackbar.make(constraintLayout, throwable.getMessage(),
-                                        Snackbar.LENGTH_SHORT)
-                                        .show();
-                            }));
+                              .observeOn(AndroidSchedulers.mainThread())
+                              .subscribeOn(Schedulers.io())
+                              .subscribe(e ->
+                                              Log.d("LOG", e.toString()),
+                                      throwable ->
+                                      {
+                                          Snackbar.make(constraintLayout, throwable.getMessage(),
+                                                  Snackbar.LENGTH_SHORT)
+                                                  .show();
+                                      }));
         }
     }
 }

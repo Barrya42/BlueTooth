@@ -116,7 +116,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         {
             bluetoothDevices.add(o);
         }
-        notifyItemChanged(bluetoothDevices.size()-1);
+        notifyItemInserted(bluetoothDevices.size()-1);
 //        notifyDataSetChanged();
 
 
@@ -140,7 +140,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
                     if (bluetoothDevice.getBondState() != bluetoothDevice.BOND_BONDED)
                     {
                         bluetoothDevices.remove(bluetoothDevice);
-                        notifyItemChanged(i);
+                        notifyItemRemoved(i);
                     }
                 }
             }
