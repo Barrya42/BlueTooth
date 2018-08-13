@@ -2,11 +2,14 @@ package com.example.derbenevsv.bluetooth;
 
 import android.bluetooth.BluetoothSocket;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import io.reactivex.Single;
 
@@ -33,8 +36,8 @@ public class BTExchangeRxJava implements Door
 
     private Single<Response> SendCommand(final String newCommand)
     {
-//        Single<Response> data =
-              return  Single.create(emitter ->
+        Single<Response> data =
+                Single.create(emitter ->
                 {
                     if (bluetoothSocket != null && bluetoothSocket.isConnected())
                     {
@@ -42,30 +45,35 @@ public class BTExchangeRxJava implements Door
 //                        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
                         DataOutputStream outputStream = new DataOutputStream(bluetoothSocket.getOutputStream());
                         // TODO: 31.07.2018 в яве byte -127..128 в C 0..255;
-                        outputStream.write(newCommand.getBytes());
+                        try
+                        {
+                            outputStream.write(newCommand.getBytes());
+                        }
+                        catch (IOException e)
+                        {
+                            bluetoothSocket.close();
+                            emitter.onError(new ConnectException("Connection with: " + bluetoothSocket.getRemoteDevice()
+                                    .getName() + " not established"));
+                        }
                         Response response = null;
                         StringBuilder stringBuilder = new StringBuilder();
 
                         //outputStream.write('\r');//CR
                         //outputStream.write('\n');//NR
-                        //outputStream.close();
-//                        InputStreamReader inputStream = new InputStreamReader(socket.getInputStream());
                         InputStreamReader inputStream = new InputStreamReader(bluetoothSocket.getInputStream(), StandardCharsets.UTF_8);
-                        TimeUnit.MILLISECONDS.sleep(1500);
-
-                        //TimeUnit.MILLISECONDS.sleep(100);
-                        char[] buffer = new char[64];
-                        int received;
-                        //while ((received = inputStream.read(buffer)) != -1)
-                        while (inputStream.ready())
-                        {
-                            received = inputStream.read(buffer);
-//                            inputStream.read();
-                            stringBuilder.append(buffer, 0, received);
-
-//                        break;
-                            // TODO: 12.07.2018 Если отправляли команду "Привет", и пришел ответ, то нужно пометить флаг что поздоровались.
-                        }
+                        TimeUnit.MILLISECONDS.sleep(200);
+                        String newLine = System.getProperty("line.separator");
+                        BufferedReader reader = new BufferedReader(inputStream);
+                        //StringBuilder result = new StringBuilder();
+                        String line;
+                        boolean flag = false;
+                        line = reader.readLine();
+                        //while (!flag && (line = reader.readLine()) != null)
+//                        {
+                        stringBuilder.append(flag ? newLine : "")
+                                .append(line);
+                        flag = true;
+//                        }
 
                         try
                         {
@@ -79,6 +87,10 @@ public class BTExchangeRxJava implements Door
                         {
                             isHelloed = true;
                         }
+                        else if (response.getResultCode() == 501)
+                        {
+                            isHelloed = false;
+                        }
 //                        else if (newCommand.equals(COMMAND_OPEN_DOOR) && response != null && response.isSuccessful())
                         emitter.onSuccess(response);
 //                emitter.onComplete();
@@ -89,8 +101,8 @@ public class BTExchangeRxJava implements Door
                                 .getName() + " not established"));
                     }
                 });
-//        return data.timeout(RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS)
-//                .onErrorResumeNext(Single.just(new Response(500, "timeout")));
+        return data.timeout(RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS)
+                .onErrorResumeNext(Single.just(new Response(500, "timeout")));
 
 
     }
