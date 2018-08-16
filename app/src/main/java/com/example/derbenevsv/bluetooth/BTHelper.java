@@ -119,6 +119,7 @@ public class BTHelper
             //intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
             intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
+
             //unregisterReceiver(receiver.getReceiver());
 
             context.registerReceiver(receiver, intentFilter);
