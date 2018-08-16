@@ -201,12 +201,13 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
             toDispose.dispose();
             toDispose = new CompositeDisposable();
         }
-        if (!btHelper.isConnected() && btHelper.getBTstate() != BTHelper.STATE_CONNECTING)
+//        if (!btHelper.isConnected() && btHelper.getBTState() != BTHelper.STATE_CONNECTING)
+        if (btHelper.getBTState() == BTHelper.STATE_CONNECTED)
         {
             Snackbar.make(constraintLayout, bluetoothDevice.toString() + " Connect",
                     Snackbar.LENGTH_SHORT)
                     .show();
-            Log.d("LOG", String.valueOf(btHelper.getBTstate()));
+            Log.d("LOG", String.valueOf(btHelper.getBTState()));
             vh.getPbConnecting().setVisibility(View.VISIBLE);
             vh.getBtConnect().setVisibility(View.INVISIBLE);
             toDispose.add(btHelper.Connect(adress)
@@ -216,13 +217,13 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                                           {
                                               door = d;
                                               vh.getPbConnecting().setVisibility(View.GONE);
-                                              vh.getBtConnect().setVisibility(View.VISIBLE);
+                                              //vh.getBtConnect().setVisibility(View.VISIBLE);
                                               vh.getBtConnect().setEnabled(false);
                                               vh.getBtOpen().setEnabled(true);
                                           }, throwable ->
                                           {
                                               vh.getPbConnecting().setVisibility(View.GONE);
-                                              vh.getBtConnect().setVisibility(View.VISIBLE);
+                                              //vh.getBtConnect().setVisibility(View.VISIBLE);
                                               Snackbar.make(constraintLayout, throwable.getMessage(),
                                                       Snackbar.LENGTH_SHORT)
                                                       .show();
@@ -238,15 +239,22 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 //                Snackbar.LENGTH_SHORT)
 //                .show();
 
-        if (door != null)
+        if (btHelper.getBTState() == BTHelper.STATE_CONNECTED)
         {
+            vh.getBtOpen().setEnabled(false);
             toDispose.add(door.OpenDoor()
                               .observeOn(AndroidSchedulers.mainThread())
                               .subscribeOn(Schedulers.io())
                               .subscribe(e ->
-                                              Log.d("LOG", e.toString()),
+                                      {
+                                          Log.d("LOG", e.toString());
+                                          vh.getBtOpen().setEnabled(true);
+                                      },
                                       throwable ->
                                       {
+                                          vh.getBtConnect().setEnabled(true);
+                                          vh.getPbConnecting().setVisibility(View.GONE);
+                                          //vh.getBtConnect().setVisibility(View.VISIBLE);
                                           Snackbar.make(constraintLayout, throwable.getMessage(),
                                                   Snackbar.LENGTH_SHORT)
                                                   .show();

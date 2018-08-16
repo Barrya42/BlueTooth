@@ -35,7 +35,7 @@ public class BTHelper
         this.bluetoothListAdapter = bluetoothListAdapter;
     }
 
-    public int getBTstate()
+    public int getBTState()
     {
         return BTstate;
     }
