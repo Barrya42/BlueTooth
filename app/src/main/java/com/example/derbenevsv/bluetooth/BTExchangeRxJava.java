@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import io.reactivex.Single;
 
@@ -52,7 +51,8 @@ public class BTExchangeRxJava implements Door
                         catch (IOException e)
                         {
                             bluetoothSocket.close();
-                            emitter.onError(new ConnectException("Connection with: " + bluetoothSocket.getRemoteDevice()
+                            emitter.onError(new ConnectException("Connection with: " + bluetoothSocket
+                                    .getRemoteDevice()
                                     .getName() + " not established"));
                         }
                         Response response = null;
@@ -66,13 +66,25 @@ public class BTExchangeRxJava implements Door
                         BufferedReader reader = new BufferedReader(inputStream);
                         //StringBuilder result = new StringBuilder();
                         String line;
-                        boolean flag = false;
-                        line = reader.readLine();
+//                        boolean flag = false;
+                        try
+                        {
+                            line = reader.readLine();
+                        }
+                        catch (IOException e)
+                        {
+                            line = "";
+                            bluetoothSocket.close();
+                            emitter.onError(new ConnectException("Connection with: " + bluetoothSocket
+                                    .getRemoteDevice()
+                                    .getName() + " not established"));
+                        }
                         //while (!flag && (line = reader.readLine()) != null)
 //                        {
-                        stringBuilder.append(flag ? newLine : "")
+                        stringBuilder
+                                //.append(flag ? newLine : "")
                                 .append(line);
-                        flag = true;
+//                        flag = true;
 //                        }
 
                         try
@@ -98,11 +110,11 @@ public class BTExchangeRxJava implements Door
                     else
                     {
                         emitter.onError(new ConnectException("Connection with: " + bluetoothSocket.getRemoteDevice()
-                                .getName() + " not established"));
+                                                                                                  .getName() + " not established"));
                     }
                 });
         return data.timeout(RESPONSE_TIMEOUT, TimeUnit.MILLISECONDS)
-                .onErrorResumeNext(Single.just(new Response(500, "timeout")));
+                   .onErrorResumeNext(Single.just(new Response(500, "timeout")));
 
 
     }

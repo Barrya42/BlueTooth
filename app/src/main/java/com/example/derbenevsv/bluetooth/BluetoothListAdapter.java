@@ -36,7 +36,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
 
         //Добавим спаренные устройства поумолчанию
         for (BluetoothDevice bluetoothDevice : BluetoothAdapter.getDefaultAdapter()
-                .getBondedDevices())
+                                                               .getBondedDevices())
         {
             bluetoothDevices.add(bluetoothDevice);
         }
@@ -48,7 +48,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         View mView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.bluetooth_list_item, parent, false);
+                                   .inflate(R.layout.bluetooth_list_item, parent, false);
         BluetoothVH vh = new BluetoothVH(mView);
 
         return vh;
@@ -65,23 +65,32 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         bluetoothVH.setTvName(device.getName() + (device.getBondState() == BluetoothDevice.BOND_BONDED ? " (paired)" : ""));
 
         bluetoothVH.getBtConnect()
-                .setOnClickListener(view ->
-                {
-                    int i = (Integer) (root).getTag();
-                    if (deviceInteractable != null)
-                    {
-                        deviceInteractable.OnClickConnect(bluetoothVH, bluetoothDevices.get(i));
-                    }
-                });
+                   .setOnClickListener(view ->
+                   {
+                       int i = (Integer) (root).getTag();
+                       if (deviceInteractable != null)
+                       {
+                           deviceInteractable.OnClickConnect(bluetoothVH, bluetoothDevices.get(i));
+                       }
+                   });
         bluetoothVH.getBtOpen()
-                .setOnClickListener(view ->
-                {
-                    int i = (Integer) (root).getTag();
-                    if (deviceInteractable != null)
-                    {
-                        deviceInteractable.OnClickOpen(bluetoothVH, bluetoothDevices.get(i));
-                    }
-                });
+                   .setOnClickListener(view ->
+                   {
+                       int i = (Integer) (root).getTag();
+                       if (deviceInteractable != null)
+                       {
+                           deviceInteractable.OnClickOpen(bluetoothVH, bluetoothDevices.get(i));
+                       }
+                   });
+        root.setOnLongClickListener(view ->
+        {
+            int i = (Integer) (root).getTag();
+            if (deviceInteractable != null)
+            {
+                deviceInteractable.OnLongClick(bluetoothVH, bluetoothDevices.get(i));
+            }
+            return true;
+        });
     }
 
     @Override
@@ -115,7 +124,7 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         if (!bluetoothDevices.contains(o))
         {
             bluetoothDevices.add(o);
-            notifyItemInserted(bluetoothDevices.size()-1);
+            notifyItemInserted(bluetoothDevices.size() - 1);
         }
 
 //        notifyDataSetChanged();
@@ -148,8 +157,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
             else
             {
                 bluetoothDevices = bluetoothDevices.stream()
-                        .filter(bt -> bt.getBondState() == BluetoothDevice.BOND_BONDED)
-                        .collect(Collectors.toList());
+                                                   .filter(bt -> bt.getBondState() == BluetoothDevice.BOND_BONDED)
+                                                   .collect(Collectors.toList());
                 notifyDataSetChanged();
             }
         }
@@ -171,6 +180,8 @@ public class BluetoothListAdapter extends RecyclerView.Adapter implements Single
         void OnClickConnect(BluetoothVH vh, BluetoothDevice bluetoothDevice);
 
         void OnClickOpen(BluetoothVH vh, BluetoothDevice bluetoothDevice);
+
+        void OnLongClick(BluetoothVH vh, BluetoothDevice bluetoothDevice);
     }
 
     class BluetoothVH extends RecyclerView.ViewHolder

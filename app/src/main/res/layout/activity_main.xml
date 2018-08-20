@@ -8,21 +8,6 @@
     tools:context=".MainActivity">
 
 
-    <EditText
-        android:id="@+id/etMac"
-        android:layout_width="172dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="MAC adress"
-
-        app:layout_constraintEnd_toStartOf="@+id/progressBar"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/btOpen"
-        app:layout_constraintTop_toBottomOf="@+id/btScan" />
-
     <Button
         android:id="@+id/btScan"
         android:layout_width="wrap_content"
@@ -57,23 +42,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btScan" />
 
-    <Button
-        android:id="@+id/btOpenByAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="Открыть"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.028"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btScan" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvDevices"
-        android:layout_width="344dp"
-        android:layout_height="375dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -81,6 +53,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btOpen" />
+        app:layout_constraintTop_toBottomOf="@+id/btScan" />
 
 </android.support.constraint.ConstraintLayout>

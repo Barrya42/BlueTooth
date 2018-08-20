@@ -29,10 +29,9 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
 
     //String adress = "00:21:13:04:af:f2".toUpperCase();
     //String adress = "00:18:e4:34:f0:2e".toUpperCase();
-    String adress = "00:18:e4:34:bf:20".toUpperCase();//HC-05
+//    String adress = "00:18:e4:34:bf:20".toUpperCase();//HC-05
     //BroadcastReceiverScan reciver;
     BluetoothListAdapter bluetoothListAdapter;
-    private EditText etMac;
     private Button btScan;
     private CheckBox cbAutoOPen;
     //    private ExchangeRxJava exchangeTask;
@@ -49,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        etMac = findViewById(R.id.etMac);
-        etMac.setText(adress);
         btScan = findViewById(R.id.btScan);
         cbAutoOPen = findViewById(R.id.cbAutoOPen);
         btScan.setOnClickListener(view ->
@@ -60,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                 StartScan();
             }
         });
-        btOpenByAddress = findViewById(R.id.btOpenByAddress);
         cbAutoOPen.setOnCheckedChangeListener(this);
         constraintLayout = findViewById(R.id.mainLayout);
         rvDevices = findViewById(R.id.rvDevices);
@@ -71,28 +67,6 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
 
         toDispose = new CompositeDisposable();
-        btOpenByAddress.setOnClickListener(view ->
-        {
-            if (!btHelper.isConnected())
-            {
-                toDispose.add(btHelper.Connect(adress)
-                                      .observeOn(AndroidSchedulers.mainThread())
-                                      .subscribeOn(Schedulers.io())
-                                      .subscribe(d ->
-                                              door = d, Throwable::printStackTrace));
-            }
-
-            else if (door != null)
-            {
-                toDispose.add(door.OpenDoor()
-                                  .observeOn(AndroidSchedulers.mainThread())
-                                  .subscribeOn(Schedulers.io())
-                                  .subscribe(e ->
-                                          Log.d("LOG", e.toString()), Throwable::printStackTrace));
-            }
-        });
-
-
     }
 
 
@@ -210,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
             Log.d("LOG", String.valueOf(btHelper.getBTState()));
             vh.getPbConnecting().setVisibility(View.VISIBLE);
             vh.getBtConnect().setVisibility(View.INVISIBLE);
-            toDispose.add(btHelper.Connect(adress)
+            toDispose.add(btHelper.Connect(bluetoothDevice)
                                   .observeOn(AndroidSchedulers.mainThread())
                                   .subscribeOn(Schedulers.io())
                                   .subscribe(d ->
@@ -260,5 +234,10 @@ public class MainActivity extends AppCompatActivity implements CheckBox.OnChecke
                                                   .show();
                                       }));
         }
+    }
+
+    @Override public void OnLongClick(BluetoothListAdapter.BluetoothVH vh, BluetoothDevice bluetoothDevice)
+    {
+
     }
 }
